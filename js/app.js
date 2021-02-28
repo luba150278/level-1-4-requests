@@ -26,12 +26,20 @@ window.onload = () => {
     if (response.ok) {
       let json = await response.json();
       let data = json.data;
-      let inner, itemInner;
+      let dateField, month, day, inner, itemInner;
       for (let item in data) {
         inner = data[item];
         itemInner = {};
         for (let x in inner) {
-          itemInner[x] = inner[x];
+          if (typeof inner[x] == 'string' && !isNaN(Date.parse(inner[x]))) {
+            dateField = new Date(Date.parse(inner[x]));
+            month = dateField.getMonth() + 1;
+            month = (month <= 9) ? `0${month}` : month;
+            day = (dateField.getDate() <= 9) ? `0${dateField.getDate()}` : dateField.getDate();
+            itemInner[x] = `${day}.${month}.${dateField.getFullYear()}`;
+          } else {
+            itemInner[x] = inner[x];
+          }
         }
         apiData.push(itemInner);
       }
@@ -48,7 +56,7 @@ window.onload = () => {
       let columns = []
       let itemColumnConfig;
       for (let title in titles) {
-        itemColumnConfig ={};
+        itemColumnConfig = {};
         itemColumnConfig['title'] = title.charAt(0).toUpperCase() + title.slice(1);
         itemColumnConfig['value'] = title;
         columns.push(itemColumnConfig);
@@ -56,22 +64,15 @@ window.onload = () => {
       config['columns'] = columns;
       return config;
     }
-
-    function checkData(){
-      let col = apiData[0];
-      
-    }
-   
-
     //-------------------------TABLE--------------------------------------
     let tableRow;
     let idParent; //id div where was added table
     let idTable;  //id table
     let config, data;
-    if(apiData.length == 0){
+    if (apiData.length == 0) {
       config = config1;
       data = users;
-    }else{
+    } else {
       config = apiConfig();
       data = apiData;
     }
@@ -85,29 +86,28 @@ window.onload = () => {
     * @param {*} data 
     */
     function tableData(config, data) {
-      let usedData = []
-      let title = {}
+      let usedData = [];
+      let title = {};
       //Form data for header table
-      title['number'] = '№'
+      title['number'] = '№';
       config.columns.map((arr, i) => {
-        title[arr.value] = arr.title
+        title[arr.value] = arr.title;
       })
-      usedData.push(title)
+      usedData.push(title);
 
       //For data for body table
       data.map((arr, i) => {
-        let items = {}
-        items['number'] = i + 1
+        let items = {};
+        items['number'] = i + 1;
         for (let key in arr) {
           if (title[key]) {
-            items[key] = arr[key]
+            items[key] = arr[key];
           }
         }
-        usedData.push(items)
+        usedData.push(items);
       })
 
-      //console.log(usedData)
-      return usedData
+      return usedData;
     }
 
     /**
