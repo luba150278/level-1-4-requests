@@ -168,18 +168,8 @@ window.onload = () => {
      */
     function addTextToCell(element, text, isArrow, id) {
       let th = document.createElement(element);
-      let regex = /(jpg)|(png)|(jpeg)/gi;
-      let t = String(text);
-      console.log(t)
-      if(t.match(regex)){
-        let img =  document.createElement('img');
-        img.src = t;
-        img.className = 'imgAvatar';
-        th.appendChild(img);
-      }else{ 
-        let textNode = document.createTextNode(text);
-        th.appendChild(textNode);
-      }
+      let textNode = document.createTextNode(text);
+      th.appendChild(textNode);
 
       if (isArrow) {
         th.id = `th_${id}`;
