@@ -16,9 +16,9 @@ window.onload = () => {
     { id: 30051, name: 'Вячеслав', surname: 'Андреев', age: 15 },
   ];
   //--------------------------------API--------------------------------
-  let apiUrl = "http://mock-api.shpp.me/lmyetolkina/users";
+  let apiUrl = "https://mock-api.shpp.me/lmyetolkina/users";
 
-
+  //get api Data an convert JSON to array;
   async function getDataFromApi() {
     let i = 0;
     let apiData = []
@@ -31,6 +31,7 @@ window.onload = () => {
         inner = data[item];
         itemInner = {};
         for (let x in inner) {
+          //check date format and convert it to "dd.mm.yyyy"
           if (typeof inner[x] == 'string' && !isNaN(Date.parse(inner[x]))) {
             dateField = new Date(Date.parse(inner[x]));
             month = dateField.getMonth() + 1;
@@ -49,6 +50,7 @@ window.onload = () => {
 
   (async () => {
     let apiData = await getDataFromApi();
+    //Create congig with table titles and columns
     let apiConfig = () => {
       let titles = apiData[0];
       let config = {};
@@ -166,8 +168,18 @@ window.onload = () => {
      */
     function addTextToCell(element, text, isArrow, id) {
       let th = document.createElement(element);
-      let textNode = document.createTextNode(text);
-      th.appendChild(textNode);
+      let regex = /(jpg)|(png)|(jpeg)/gi;
+      let t = String(text);
+      console.log(t)
+      if(t.match(regex)){
+        let img =  document.createElement('img');
+        img.src = t;
+        img.className = 'imgAvatar';
+        th.appendChild(img);
+      }else{ 
+        let textNode = document.createTextNode(text);
+        th.appendChild(textNode);
+      }
 
       if (isArrow) {
         th.id = `th_${id}`;

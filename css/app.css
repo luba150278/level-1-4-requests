@@ -115,4 +115,8 @@ table tr td:last-child, table tr th:last-child {
   border-top: 6px solid white;
   bottom: 0;
 }
+
+.imgAvatar {
+  max-width: 50px;
+}
 /*# sourceMappingURL=app.css.map */
