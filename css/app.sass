@@ -6,7 +6,7 @@ html
   font-weight: 300
   color: #343733
 .container
-  max-width: 90vw
+  max-width: 1440px
   margin: 0 auto
 .tables__inner
   display: flex
@@ -22,10 +22,37 @@ h1
   font-size: 2rem
 h2
   font-size: 1.5rem
+button
+  color: white
+  background: #2196f3
+  border-radius: 4px
+  border: none
+  padding: 0 10px
+  font-weight: 700
+  height: 40px
+  min-width: 160px
+  &:hover
+    cursor: pointer
+    background: #ee67c8 
 
+.searchPanel
+  width: 100%
+  padding: 2px
+  display: flex
+  justify-content: space-between
+  margin-bottom: 20px
+.search  
+  height: 30px
+  font-size: 16px
+  align-items: flex-start
+.tableCustom
+  width: 100%
+  display: flex
+  margin-bottom: 20px
 table
   width: 100%
   border-collapse: collapse
+  overflow: scroll
 
 th, td
   padding: 5px 30px 5px 10px
@@ -50,12 +77,18 @@ table tbody tr:hover
   background: #9fafc0
   cursor: pointer
   font-weight: 400
-.tableCustom
-  margin-bottom: 20px
 
-table tr td:last-child, table tr th:last-child
-  display: none
+//table tr td:last-child, table tr th:last-child
+ // display: none
+.btnDelete
+  background: #ee67c8  
+  padding: 5px 10px
+  height: 25px
+  min-width: 50px
+  &:hover
+    background: #2196f3
 
+  
 .arrow
   border: 6px solid transparent
   width: 0

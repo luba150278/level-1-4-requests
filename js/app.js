@@ -17,10 +17,14 @@ window.onload = () => {
   ];
   //--------------------------------API--------------------------------
   let apiUrl = "https://mock-api.shpp.me/lmyetolkina/users";
-
+  let apiData;
+  let repaintTableHeader = true;
   //get api Data an convert JSON to array;
+  /**
+   * 
+   */
   async function getDataFromApi() {
-    let i = 0;
+
     let apiData = []
     let response = await fetch(apiUrl);
     if (response.ok) {
@@ -48,16 +52,33 @@ window.onload = () => {
     return apiData;
   }
 
+  async function deleteItem(id) {
+    const response = await fetch(apiUrl + "/" + id, { method: "DELETE" });
+    if (response.ok) {
+      apiData = await getDataFromApi();        
+      return false;           
+    }
+  }
+
   (async () => {
-    let apiData = await getDataFromApi();
+    apiData = await getDataFromApi();
+    let nuberIdColumns;
     //Create congig with table titles and columns
+    /**
+     * 
+     */
     let apiConfig = () => {
       let titles = apiData[0];
+      let counter = 1;
       let config = {};
       config['parent'] = config1.parent;
       let columns = []
       let itemColumnConfig;
       for (let title in titles) {
+        counter++;
+        if (String(title).toLocaleLowerCase().indexOf('id') != -1) {
+          nuberIdColumns = counter;
+        }
         itemColumnConfig = {};
         itemColumnConfig['title'] = title.charAt(0).toUpperCase() + title.slice(1);
         itemColumnConfig['value'] = title;
@@ -66,21 +87,28 @@ window.onload = () => {
       config['columns'] = columns;
       return config;
     }
+
     //-------------------------TABLE--------------------------------------
     let tableRow;
     let idParent; //id div where was added table
     let idTable;  //id table
     let config, data;
-    if (apiData.length == 0) {
-      config = config1;
-      data = users;
-    } else {
-      config = apiConfig();
-      data = apiData;
+    let newData;
+    start();
+    function start() {
+      if (apiData.length == 0) {
+        config = config1;
+        data = users;
+      } else {
+        if(repaintTableHeader){
+          config = apiConfig();
+        }
+        data = apiData;
+      }
+      console.log(nuberIdColumns)
+      newData = tableData(config, data); //Select data equals config colums; 
+      DataTable(config, repaintTableHeader, 'tbl_1'); //Start adding table
     }
-
-    let newData = tableData(config, data); //Select data equals config colums; 
-    DataTable(config, true, 'tbl_1'); //Start adding table
 
     /**
     * Select data to the table
@@ -108,7 +136,6 @@ window.onload = () => {
         }
         usedData.push(items);
       })
-
       return usedData;
     }
 
@@ -131,6 +158,7 @@ window.onload = () => {
         table.appendChild(tableHead);
         tableHead.appendChild(tableRow);
         formCells('th', 0, true);  //form table head
+        formDeleteButtons('th', 'Actions', true);
       } else {
         table = document.getElementById(idTable);
       }
@@ -142,6 +170,7 @@ window.onload = () => {
         tableRow = document.createElement('tr');
         tableBody.appendChild(tableRow);
         formCells('td', i, false);
+        formDeleteButtons('td', 'Delete', false, newData[i]['id']);
       }
       document.getElementById(idParent).append(table);
     }
@@ -153,7 +182,6 @@ window.onload = () => {
      * @param {*} isArrow just for header - add filter arrow
      */
     function formCells(el, index, isArrow) {
-      let i = 1;
       for (let key in newData[index]) {
         tableRow.appendChild(addTextToCell(el, newData[index][key], isArrow, key));
       }
@@ -179,6 +207,28 @@ window.onload = () => {
         th.appendChild(arrow);
       }
       return th;
+    }
+
+    function formDeleteButtons(el, text, isHeader, id) {
+      let th = document.createElement(el);
+      let textNode = document.createTextNode(text);
+      if (isHeader) {
+        th.appendChild(textNode);
+        tableRow.appendChild(th);
+        return;
+      }
+      let btn = document.createElement('button');
+      th.onclick = async() => {
+        repaintTableHeader = await deleteItem(id);       
+        let table = document.getElementById(idTable)
+        table.removeChild(table.lastChild);
+        start();
+      }
+      btn.id = `btn${id}`;
+      btn.className = 'btnDelete';
+      btn.appendChild(textNode);
+      th.appendChild(btn);
+      tableRow.appendChild(th);
     }
 
     /**
