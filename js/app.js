@@ -60,7 +60,14 @@ window.onload = () => {
     }
   }
 
+  let btnAdd = document.getElementById("btnAdd");
+  btnAdd.addEventListener("click", async (event) => {
+    alert("Hi, I'm parrent block");
+  });
+
+
   (async () => {
+
     apiData = await getDataFromApi();
     let nuberIdColumns;
     //Create congig with table titles and columns
