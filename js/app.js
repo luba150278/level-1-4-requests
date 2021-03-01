@@ -315,9 +315,9 @@ window.onload = () => {
             inputInTable.type = 'date';
           }
           inputInTable.id = `in_${i}`;
-          inputInTable.className ="inputEmpty";
+          inputInTable.className ='inputEmpty';
           inputInTable.addEventListener('keydown', {
-            handleEvent(event) { inputEnterData(event, tableRow.id, i, userId, `in_${i}`) }
+            handleEvent(event) { inputEnterData(event, tableRow.id, i, userId) }
           });
           td = document.createElement('td');
           td.appendChild(inputInTable);
@@ -341,7 +341,7 @@ window.onload = () => {
     }
 
 
-    async function inputEnterData(e, tableRowId, index, userId, fieldId) {
+    async function inputEnterData(e, tableRowId, index, userId) {
       //'13' is "enter code"
       if (e.keyCode == 13) {
         let isNotNull = true
@@ -354,18 +354,16 @@ window.onload = () => {
         }
 
         for (let i = 1; i < row.childNodes.length - 1; i++) {
-          td = row.childNodes[i];
+          td = row.childNodes[i];        
           if (!td.childNodes[0].value) {
-            isNotNull = false;
-            document.getElementById(fieldId).classList.toggle('inputEmpty');
+            isNotNull = false;    
           } else {
-            document.getElementById(fieldId).classList.remove('inputEmpty');
             dataOnServer[filedNames[i - 1]] = td.childNodes[0].value;
             isNotNull = true;
           }
         }
+        
         dataOnServer[filedNames[filedNames.length - 1]] = userId;
-       
         if (isNotNull) {
           repaintTableHeader = await newItem(dataOnServer);
           apiData = await getDataFromApi();
