@@ -57,12 +57,25 @@ window.onload = () => {
     return apiData;
   }
 
-  async function deleteItem(id) {
-    console.log(id)
+  async function deleteItem(id) {    
     let response = await fetch(apiUrl + "/" + id, { method: "DELETE" });
     if (response.ok) {
       apiData = await getDataFromApi();
       return false;
+    }
+  }
+
+  async function newItem(data) {
+    let response = await fetch(apiUrl,
+      {
+        method: 'POST',
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify(data)
+      }
+    );
+
+    if (response.ok) {     
+      return false; 
     }
   }
 
@@ -107,8 +120,7 @@ window.onload = () => {
     let config, data;
     let newData;
     start();
-    function start() {
-      console.log(apiData)
+    function start() {     
       if (apiData.length == 0) {
         config = config1;
         data = users;
@@ -117,8 +129,7 @@ window.onload = () => {
           config = apiConfig();
         }
         data = apiData;
-      }
-      console.log(nuberIdColumns)
+      }     
       newData = tableData(config, data); //Select data equals config colums; 
       DataTable(config, repaintTableHeader, 'tbl_1'); //Start adding table
     }
@@ -248,6 +259,7 @@ window.onload = () => {
     function repaintTableBody() {
       let table = document.getElementById(idTable)
       table.removeChild(table.lastChild);
+      clickAddButton = false;
       start();
     }
 
@@ -279,7 +291,6 @@ window.onload = () => {
       DataTable(config1, false, idTable);
     }
 
-
     let btnAdd = document.getElementById("btnAdd");
     btnAdd.addEventListener("click", (event) => {
       //We can click the "Add" button just one time before load data on the server
@@ -303,8 +314,10 @@ window.onload = () => {
           } else {
             inputInTable.type = 'date';
           }
+          inputInTable.id = `in_${i}`;
+          inputInTable.className ="inputEmpty";
           inputInTable.addEventListener('keydown', {
-            handleEvent(event) { inputEnterData(event, tableRow.id, i, userId) }
+            handleEvent(event) { inputEnterData(event, tableRow.id, i, userId, `in_${i}`) }
           });
           td = document.createElement('td');
           td.appendChild(inputInTable);
@@ -327,22 +340,8 @@ window.onload = () => {
       return sortedData[0]['id'] + 1;
     }
 
-    async function newItem(data) {
-      let response = fetch(apiUrl,
-        {
-          method: 'POST',
-          headers: { "Content-type": "application/json" },
-          body: JSON.stringify(data)
-        }
-      );
 
-      if (response.ok) {
-        apiData = await getDataFromApi();
-        //return false;
-      }
-    }
-
-    async function inputEnterData(e, tableRowId, index, userId) {
+    async function inputEnterData(e, tableRowId, index, userId, fieldId) {
       //'13' is "enter code"
       if (e.keyCode == 13) {
         let isNotNull = true
@@ -358,17 +357,19 @@ window.onload = () => {
           td = row.childNodes[i];
           if (!td.childNodes[0].value) {
             isNotNull = false;
+            document.getElementById(fieldId).classList.toggle('inputEmpty');
           } else {
+            document.getElementById(fieldId).classList.remove('inputEmpty');
             dataOnServer[filedNames[i - 1]] = td.childNodes[0].value;
             isNotNull = true;
           }
         }
         dataOnServer[filedNames[filedNames.length - 1]] = userId;
-        console.log(dataOnServer)
+       
         if (isNotNull) {
           repaintTableHeader = await newItem(dataOnServer);
-          repaintTableBody();
-          clickAddButton = true;
+          apiData = await getDataFromApi();
+          repaintTableBody();         
         }
       }
     }

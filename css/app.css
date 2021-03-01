@@ -42,6 +42,20 @@ h2 {
   font-size: 1.5rem;
 }
 
+td input {
+  width: 100%;
+  min-height: 20px;
+}
+
+td input:focus {
+  border-color: #2196f3;
+  outline-color: #2196f3;
+}
+
+.inputEmpty {
+  border-color: #ee67c8;
+}
+
 button {
   color: white;
   background: #2196f3;
