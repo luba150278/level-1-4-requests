@@ -59,7 +59,7 @@ window.onload = () => {
 
   async function deleteItem(id) {
     console.log(id)
-    const response = await fetch(apiUrl + "/" + id, { method: "DELETE" });
+    let response = await fetch(apiUrl + "/" + id, { method: "DELETE" });
     if (response.ok) {
       apiData = await getDataFromApi();
       return false;
@@ -235,7 +235,6 @@ window.onload = () => {
 
       btn.id = `btn${id}`;
       btn.onclick = async () => {
-        console.log(btn.id);
         repaintTableHeader = await deleteItem(id);
         repaintTableBody();
       }
@@ -329,7 +328,7 @@ window.onload = () => {
     }
 
     async function newItem(data) {
-      const response = fetch(apiUrl,
+      let response = fetch(apiUrl,
         {
           method: 'POST',
           headers: { "Content-type": "application/json" },
