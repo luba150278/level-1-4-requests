@@ -19,6 +19,7 @@ window.onload = () => {
   let apiUrl = "https://mock-api.shpp.me/lmyetolkina/users";
   let apiData;
   let repaintTableHeader = true;
+  let dateColumnsNumber = 1;
   //get api Data an convert JSON to array;
   /**
    * 
@@ -31,12 +32,15 @@ window.onload = () => {
       let json = await response.json();
       let data = json.data;
       let dateField, month, day, inner, itemInner;
+      let columnCounter;
       for (let item in data) {
         inner = data[item];
         itemInner = {};
+        columnCounter = 1;
         for (let x in inner) {
           //check date format and convert it to "dd.mm.yyyy"
           if (typeof inner[x] == 'string' && !isNaN(Date.parse(inner[x]))) {
+            dateColumnsNumber = columnCounter + 1;
             dateField = new Date(Date.parse(inner[x]));
             month = dateField.getMonth() + 1;
             month = (month <= 9) ? `0${month}` : month;
@@ -45,6 +49,7 @@ window.onload = () => {
           } else {
             itemInner[x] = inner[x];
           }
+          columnCounter++;
         }
         apiData.push(itemInner);
       }
@@ -53,31 +58,38 @@ window.onload = () => {
   }
 
   async function deleteItem(id) {
+    console.log(id)
     const response = await fetch(apiUrl + "/" + id, { method: "DELETE" });
     if (response.ok) {
-      apiData = await getDataFromApi();        
-      return false;           
+      apiData = await getDataFromApi();
+      return false;
     }
   }
 
+
+
   (async () => {
+
     apiData = await getDataFromApi();
     let nuberIdColumns;
+    let columnsCount;
+    let clickAddButton = false;
     //Create congig with table titles and columns
     /**
      * 
      */
     let apiConfig = () => {
       let titles = apiData[0];
-      let counter = 1;
+      columnsCount = 1;
       let config = {};
       config['parent'] = config1.parent;
       let columns = []
       let itemColumnConfig;
       for (let title in titles) {
-        counter++;
+
+        columnsCount++;
         if (String(title).toLocaleLowerCase().indexOf('id') != -1) {
-          nuberIdColumns = counter;
+          nuberIdColumns = columnsCount;
         }
         itemColumnConfig = {};
         itemColumnConfig['title'] = title.charAt(0).toUpperCase() + title.slice(1);
@@ -96,11 +108,12 @@ window.onload = () => {
     let newData;
     start();
     function start() {
+      console.log(apiData)
       if (apiData.length == 0) {
         config = config1;
         data = users;
       } else {
-        if(repaintTableHeader){
+        if (repaintTableHeader) {
           config = apiConfig();
         }
         data = apiData;
@@ -164,6 +177,7 @@ window.onload = () => {
       }
 
       let tableBody = document.createElement('tbody');
+      tableBody.id = 'tbody_1';
       table.appendChild(tableBody);
       //form table body
       for (let i = 1; i < newData.length; i++) {
@@ -218,17 +232,24 @@ window.onload = () => {
         return;
       }
       let btn = document.createElement('button');
-      th.onclick = async() => {
-        repaintTableHeader = await deleteItem(id);       
-        let table = document.getElementById(idTable)
-        table.removeChild(table.lastChild);
-        start();
-      }
+
       btn.id = `btn${id}`;
+      btn.onclick = async () => {
+        console.log(btn.id);
+        repaintTableHeader = await deleteItem(id);
+        repaintTableBody();
+      }
+
       btn.className = 'btnDelete';
       btn.appendChild(textNode);
       th.appendChild(btn);
       tableRow.appendChild(th);
+    }
+
+    function repaintTableBody() {
+      let table = document.getElementById(idTable)
+      table.removeChild(table.lastChild);
+      start();
     }
 
     /**
@@ -258,6 +279,102 @@ window.onload = () => {
       table.removeChild(table.lastChild);
       DataTable(config1, false, idTable);
     }
+
+
+    let btnAdd = document.getElementById("btnAdd");
+    btnAdd.addEventListener("click", (event) => {
+      //We can click the "Add" button just one time before load data on the server
+      if (!clickAddButton) {
+        let userId = maxUserId();
+        let tableBody = document.getElementById('tbody_1');
+        tableRow = document.createElement('tr');
+        let tableRowId = 'inputRow';
+        tableRow.id = tableRowId;
+        let td = document.createElement('td');
+        let inputInTable;
+        //Add № value -> auto value
+        let textNode = document.createTextNode(newData.length);
+        td.appendChild(textNode);
+        tableRow.appendChild(td);
+        //Add input fileds
+        for (let i = 2; i <= columnsCount - 1; i++) {
+          inputInTable = document.createElement('input');
+          if (i != dateColumnsNumber) {
+            inputInTable.type = 'text';
+          } else {
+            inputInTable.type = 'date';
+          }
+          inputInTable.addEventListener('keydown', {
+            handleEvent(event) { inputEnterData(event, tableRow.id, i, userId) }
+          });
+          td = document.createElement('td');
+          td.appendChild(inputInTable);
+          tableRow.appendChild(td);
+        }
+        //Add userId -> autovalue
+        td = document.createElement('td');
+        textNode = document.createTextNode(userId);
+        td.appendChild(textNode);
+        tableRow.appendChild(td);
+        //add row on top table
+        tableBody.prepend(tableRow);
+        clickAddButton = true; //We block the button until the data is sent to the server
+      }
+    });
+
+    function maxUserId() {
+      let sortedData = newData.sort((a, b) => b['id'] > a['id'] ? -1 : 1);
+      sortedData.reverse();
+      return sortedData[0]['id'] + 1;
+    }
+
+    async function newItem(data) {
+      const response = fetch(apiUrl,
+        {
+          method: 'POST',
+          headers: { "Content-type": "application/json" },
+          body: JSON.stringify(data)
+        }
+      );
+
+      if (response.ok) {
+        apiData = await getDataFromApi();
+        //return false;
+      }
+    }
+
+    async function inputEnterData(e, tableRowId, index, userId) {
+      //'13' is "enter code"
+      if (e.keyCode == 13) {
+        let isNotNull = true
+        let row = document.getElementById(tableRowId);
+        let td;
+        let filedNames = Object.keys(apiData[0]);
+        let dataOnServer = {};
+        if (index < row.childNodes.length - 1) {
+          row.childNodes[index].childNodes[0].focus();
+        }
+
+        for (let i = 1; i < row.childNodes.length - 1; i++) {
+          td = row.childNodes[i];
+          if (!td.childNodes[0].value) {
+            isNotNull = false;
+          } else {
+            dataOnServer[filedNames[i - 1]] = td.childNodes[0].value;
+            isNotNull = true;
+          }
+        }
+        dataOnServer[filedNames[filedNames.length - 1]] = userId;
+        console.log(dataOnServer)
+        if (isNotNull) {
+          repaintTableHeader = await newItem(dataOnServer);
+          repaintTableBody();
+          clickAddButton = true;
+        }
+      }
+    }
+
+
 
   })();
 }
