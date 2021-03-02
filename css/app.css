@@ -56,6 +56,10 @@ td input:focus {
   border-color: #ee67c8;
 }
 
+.hidden {
+  display: none;
+}
+
 button {
   color: white;
   background: #2196f3;

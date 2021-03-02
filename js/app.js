@@ -134,9 +134,9 @@ window.onload = () => {
         }
         data = apiData;
       }
-      newData = tableData(config, data); //Select data equals config colums; 
+      newData = tableData(config, data); //Select data equals config colums;      
       DataTable(config, repaintTableHeader, 'tbl_1'); //Start adding table
-      console.log(apiData)
+     
     }
 
     /**
@@ -152,8 +152,7 @@ window.onload = () => {
       config.columns.map((arr, i) => {
         title[arr.value] = arr.title;
       })
-      usedData.push(title);
-
+      usedData.push(title);      
       //For data for body table
       data.map((arr, i) => {
         let items = {};
@@ -212,6 +211,7 @@ window.onload = () => {
      * @param {*} isArrow just for header - add filter arrow
      */
     function formCells(el, index, isArrow) {
+      
       for (let key in newData[index]) {
         tableRow.appendChild(addTextToCell(el, newData[index][key], isArrow, key));
       }
@@ -226,6 +226,9 @@ window.onload = () => {
      */
     function addTextToCell(element, text, isArrow, id) {
       let th = document.createElement(element);
+      if(id == 'id'){
+        th.className ='hidden';
+      }
       let textNode = document.createTextNode(text);
       th.appendChild(textNode);
 
@@ -301,7 +304,7 @@ window.onload = () => {
     btnAdd.addEventListener("click", (event) => {
       //We can click the "Add" button just one time before load data on the server
       if (!clickAddButton) {
-        let userId = maxUserId();
+        let userId = maxUserId();      
         let tableBody = document.getElementById('tbody_1');
         tableRow = document.createElement('tr');
         let tableRowId = 'inputRow';
@@ -322,6 +325,7 @@ window.onload = () => {
           }
           inputInTable.id = `in_${i}`;
           inputInTable.className = 'inputEmpty';
+       
           inputInTable.addEventListener('keydown', {
             handleEvent(event) { inputEnterData(event, tableRow.id, i, userId) }
           });
@@ -331,9 +335,10 @@ window.onload = () => {
         }
         //Add userId -> autovalue
         td = document.createElement('td');
+        td.className ='hidden';
         textNode = document.createTextNode(userId);
         td.appendChild(textNode);
-        tableRow.appendChild(td);
+        tableRow.appendChild(td); 
         //add row on top table
         tableBody.prepend(tableRow);
         clickAddButton = true; //We block the button until the data is sent to the server
@@ -341,13 +346,14 @@ window.onload = () => {
     });
 
     function maxUserId() {
-      let sortedData = newData.sort((a, b) => b['id'] > a['id'] ? -1 : 1);
-      sortedData.reverse();
-      return sortedData[0]['id'] + 1;
+      let bodyData = newData.filter((item, i)=> item.id!="Id");      
+      let sortedData = bodyData.sort((a, b) => b['id'] > a['id'] ? -1 : 1);
+      sortedData.reverse(); 
+      return Number(sortedData[0]['id']) + 1;
     }
 
-
     async function inputEnterData(e, tableRowId, index, userId) {
+     
       //'13' is "enter code"
       if (e.keyCode == 13) {
         let isNotNull = true
