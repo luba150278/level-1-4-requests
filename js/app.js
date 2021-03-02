@@ -57,10 +57,9 @@ window.onload = () => {
     return apiData;
   }
 
-  async function deleteItem(id) {    
+  async function deleteItem(id) {
     let response = await fetch(apiUrl + "/" + id, { method: "DELETE" });
     if (response.ok) {
-      apiData = await getDataFromApi();
       return false;
     }
   }
@@ -74,8 +73,8 @@ window.onload = () => {
       }
     );
 
-    if (response.ok) {     
-      return false; 
+    if (response.ok) {
+      return false;
     }
   }
 
@@ -120,7 +119,7 @@ window.onload = () => {
     let config, data;
     let newData;
     start();
-    function start() {     
+    function start() {
       if (apiData.length == 0) {
         config = config1;
         data = users;
@@ -129,7 +128,7 @@ window.onload = () => {
           config = apiConfig();
         }
         data = apiData;
-      }     
+      }
       newData = tableData(config, data); //Select data equals config colums; 
       DataTable(config, repaintTableHeader, 'tbl_1'); //Start adding table
     }
@@ -247,6 +246,7 @@ window.onload = () => {
       btn.id = `btn${id}`;
       btn.onclick = async () => {
         repaintTableHeader = await deleteItem(id);
+        apiData = await getDataFromApi();
         repaintTableBody();
       }
 
@@ -315,7 +315,7 @@ window.onload = () => {
             inputInTable.type = 'date';
           }
           inputInTable.id = `in_${i}`;
-          inputInTable.className ='inputEmpty';
+          inputInTable.className = 'inputEmpty';
           inputInTable.addEventListener('keydown', {
             handleEvent(event) { inputEnterData(event, tableRow.id, i, userId) }
           });
@@ -354,20 +354,20 @@ window.onload = () => {
         }
 
         for (let i = 1; i < row.childNodes.length - 1; i++) {
-          td = row.childNodes[i];        
+          td = row.childNodes[i];
           if (!td.childNodes[0].value) {
-            isNotNull = false;    
+            isNotNull = false;
           } else {
             dataOnServer[filedNames[i - 1]] = td.childNodes[0].value;
             isNotNull = true;
           }
         }
-        
+
         dataOnServer[filedNames[filedNames.length - 1]] = userId;
         if (isNotNull) {
           repaintTableHeader = await newItem(dataOnServer);
           apiData = await getDataFromApi();
-          repaintTableBody();         
+          repaintTableBody();
         }
       }
     }
