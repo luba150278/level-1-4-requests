@@ -17,12 +17,12 @@ window.onload = () => {
   ];
   //--------------------------------API--------------------------------
   let apiUrl = "https://mock-api.shpp.me/lmyetolkina/users";
-  let apiData;
-  let repaintTableHeader = true;
-  let dateColumnsNumber = 1;
-  //get api Data an convert JSON to array;
+  let apiData; //data from json-file
+  let repaintTableHeader = true; //Paint in first load page
+  let dateColumnsNumber = 1; //for column with date format convert string to 'dd.mm.yyyy'
+
   /**
-   * 
+   * get api Data an convert JSON to array;
    */
   async function getDataFromApi() {
 
@@ -62,6 +62,10 @@ window.onload = () => {
     return apiData;
   }
 
+  /**
+   * delete user from database and visual table
+   * @param {*} id user Id
+   */
   async function deleteItem(id) {
     let response = await fetch(apiUrl + "/" + id, { method: "DELETE" });
     if (response.ok) {
@@ -69,6 +73,10 @@ window.onload = () => {
     }
   }
 
+  /**
+   * Create new item in database
+   * @param {*} data string with new user data
+   */
   async function newItem(data) {
     let response = await fetch(apiUrl,
       {
@@ -83,17 +91,18 @@ window.onload = () => {
     }
   }
 
-
-
+  /**
+   * Main block - create page element, table data, add event listeners etc
+   */
   (async () => {
 
-    apiData = await getDataFromApi();
-    let nuberIdColumns;
-    let columnsCount;
-    let clickAddButton = false;
-    //Create congig with table titles and columns
+    apiData = await getDataFromApi(); //extract data from server json-file
+    let nuberIdColumns; 
+    let columnsCount; //count columns in data
+    let clickAddButton = false; //block add button then new item was created but wasn't loaded on server
+    
     /**
-     * 
+     * Create congig from json-fiel. Made table titles and columns
      */
     let apiConfig = () => {
       let titles = apiData[0];
@@ -122,8 +131,12 @@ window.onload = () => {
     let idParent; //id div where was added table
     let idTable;  //id table
     let config, data;
-    let newData;
+    let newData; //choose start data. It can be local or remote (json) data
     start();
+
+    /**
+     * TODO - may be create two variant...
+     */
     function start() {
       if (apiData.length == 0) {
         config = config1;
@@ -135,8 +148,7 @@ window.onload = () => {
         data = apiData;
       }
       newData = tableData(config, data); //Select data equals config colums;      
-      DataTable(config, repaintTableHeader, 'tbl_1'); //Start adding table
-     
+      DataTable(config, repaintTableHeader, 'tbl_1'); //Start adding table     
     }
 
     /**
@@ -178,6 +190,7 @@ window.onload = () => {
       idTable = tableName;
       idParent = config.parent.substring(1);
       let table, tableHead;
+       //form table head
       if (isRepaintHead) {
         table = document.createElement('table');
         table.id = idTable;
@@ -185,21 +198,22 @@ window.onload = () => {
         tableRow = document.createElement('tr');
         table.appendChild(tableHead);
         tableHead.appendChild(tableRow);
-        formCells('th', 0, true);  //form table head
+        formCells('th', 0, true); 
         formDeleteButtons('th', 'Actions', true);
       } else {
         table = document.getElementById(idTable);
       }
 
+       //form table body
       let tableBody = document.createElement('tbody');
       tableBody.id = 'tbody_1';
       table.appendChild(tableBody);
-      //form table body
+     
       for (let i = 1; i < newData.length; i++) {
         tableRow = document.createElement('tr');
         tableBody.appendChild(tableRow);
         formCells('td', i, false);
-        formDeleteButtons('td', 'Delete', false, newData[i]['id']);
+        formDeleteButtons('td', 'Delete item', false, newData[i]['id']);
       }
       document.getElementById(idParent).append(table);
     }
@@ -242,6 +256,13 @@ window.onload = () => {
       return th;
     }
 
+    /**
+     * For every table row add button "Delete item"
+     * @param {*} el element
+     * @param {*} text text content
+     * @param {*} isHeader for header add just title
+     * @param {*} id user Id use for form element id
+     */
     function formDeleteButtons(el, text, isHeader, id) {
       let th = document.createElement(el);
       let textNode = document.createTextNode(text);
@@ -265,6 +286,9 @@ window.onload = () => {
       tableRow.appendChild(th);
     }
 
+    /**
+     * Repaint table body after delete or add item 
+     */
     function repaintTableBody() {
       let table = document.getElementById(idTable)
       table.removeChild(table.lastChild);
@@ -301,6 +325,9 @@ window.onload = () => {
     }
 
     let btnAdd = document.getElementById("btnAdd");
+    /**
+     * Add event listener to "Add item" buton. First "click" - add row for data, second click -> hidden with row
+     */
     btnAdd.addEventListener("click", (event) => {
       //We can click the "Add" button just one time before load data on the server
       if (!clickAddButton) {
@@ -345,6 +372,9 @@ window.onload = () => {
       }
     });
 
+    /**
+     * Find max user Id and increment it for new user
+     */
     function maxUserId() {
       let bodyData = newData.filter((item, i)=> item.id!="Id");      
       let sortedData = bodyData.sort((a, b) => b['id'] > a['id'] ? -1 : 1);
@@ -352,19 +382,28 @@ window.onload = () => {
       return Number(sortedData[0]['id']) + 1;
     }
 
+    /**
+     * After every "enter" click check data. If all fields aren't empty create new item in database
+     * @param {*} e - event
+     * @param {*} tableRowId - for input row add special id
+     * @param {*} index - column index
+     * @param {*} userId - user id
+     */
     async function inputEnterData(e, tableRowId, index, userId) {
      
       //'13' is "enter code"
       if (e.keyCode == 13) {
-        let isNotNull = true
+        let isNotNull = true //checked flag
         let row = document.getElementById(tableRowId);
         let td;
         let filedNames = Object.keys(apiData[0]);
         let dataOnServer = {};
+        //set focus on next rigth column after "enter" click
         if (index < row.childNodes.length - 1) {
           row.childNodes[index].childNodes[0].focus();
         }
 
+        //Check fields, if field is empty set "false" in checked flag
         for (let i = 1; i < row.childNodes.length - 1; i++) {
           td = row.childNodes[i];
           if (!td.childNodes[0].value) {
@@ -373,9 +412,9 @@ window.onload = () => {
             dataOnServer[filedNames[i - 1]] = td.childNodes[0].value;
             isNotNull = true;
           }
-        }
-
+        }        
         dataOnServer[filedNames[filedNames.length - 1]] = userId;
+        //if all row fields are fill, load item on server
         if (isNotNull) {
           repaintTableHeader = await newItem(dataOnServer);
           apiData = await getDataFromApi();
