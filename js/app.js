@@ -31,13 +31,14 @@ window.onload = () => {
     if (response.ok) {
       let json = await response.json();
       let data = json.data;
+      
       let dateField, month, day, inner, itemInner;
       let columnCounter;
       for (let item in data) {
         inner = data[item];
         itemInner = {};
         columnCounter = 1;
-        for (let x in inner) {
+        for (let x in inner) {          
           //check date format and convert it to "dd.mm.yyyy"
           if (typeof inner[x] == 'string' && !isNaN(Date.parse(inner[x]))) {
             dateColumnsNumber = columnCounter + 1;
@@ -47,7 +48,11 @@ window.onload = () => {
             day = (dateField.getDate() <= 9) ? `0${dateField.getDate()}` : dateField.getDate();
             itemInner[x] = `${day}.${month}.${dateField.getFullYear()}`;
           } else {
-            itemInner[x] = inner[x];
+            if(x == 'id'){
+              itemInner[x] = item;
+            }else{
+              itemInner[x] = inner[x];
+            }
           }
           columnCounter++;
         }
@@ -131,6 +136,7 @@ window.onload = () => {
       }
       newData = tableData(config, data); //Select data equals config colums; 
       DataTable(config, repaintTableHeader, 'tbl_1'); //Start adding table
+      console.log(apiData)
     }
 
     /**
