@@ -131,6 +131,8 @@ async function newItem(data) {
   let idTable;  //id table
   let config, data;
   let newData; //choose start data. It can be local or remote (json) data
+  let searchVal = ''; //data in search fields
+  let tableHeader;
   start();
 
   /**
@@ -157,25 +159,31 @@ async function newItem(data) {
   */
   function tableData(config, data) {
     let usedData = [];
-    let title = {};
-    //Form data for header table
-    title['number'] = '№';
-    config.columns.map((arr, i) => {
-      title[arr.value] = arr.title;
-    })
-    usedData.push(title);
+    tableHeader = getTableHeader(config);
+
+    usedData.push(tableHeader);
     //For data for body table
     data.map((arr, i) => {
       let items = {};
       items['number'] = i + 1;
       for (let key in arr) {
-        if (title[key]) {
+        if (tableHeader[key]) {
           items[key] = arr[key];
         }
       }
       usedData.push(items);
     })
     return usedData;
+  }
+
+  function getTableHeader(config) {
+    let title = {};
+    //Form data for header table
+    title['number'] = '№';
+    config.columns.map((arr, i) => {
+      title[arr.value] = arr.title;
+    })
+    return title;
   }
 
   /**
@@ -301,7 +309,10 @@ async function newItem(data) {
    * @param {*} arrow 
    */
   function sort(columnName, arrow) {
+
+
     let sortedData = newData.filter((item, i) => i > 0);
+
     //sort body data
     if (arrow.classList.contains("arrow-up")) {
       arrow.classList.remove("arrow-up");
@@ -321,6 +332,7 @@ async function newItem(data) {
     let table = document.getElementById(idTable)
     table.removeChild(table.lastChild);
     DataTable(config1, false, idTable);
+
   }
 
   let btnAdd = document.getElementById("btnAdd");
@@ -418,28 +430,39 @@ async function newItem(data) {
         repaintTableHeader = await newItem(dataOnServer);
         apiData = await getDataFromApi();
         repaintTableBody();
+        searchVal = '';
+        document.getElementById('search').value = searchVal;
       }
     }
   }
 
   /**
-   * 
+   * Search data by the context in all table rows
    */
   document.getElementById('search').addEventListener('keyup', () => {
-    let val = document.getElementById('search').value.toLowerCase();
-    let filterData = apiData.filter( item => item.name.toLowerCase().indexOf(val) != -1 || item.surname.toLowerCase().indexOf(val) != -1 || item.avatar.toLowerCase().indexOf(val) != -1 || item.birthday.toLowerCase().indexOf(val) != -1)
+
+    searchVal = document.getElementById('search').value.toLowerCase();
+
+    //repaintTable
+    let table = document.getElementById(idTable)
+    table.remove();
+    repaintTableHeader = true;
+    start();
+    //filtered
+    let filterData = newData.filter((item, i) => i == 0 || (item.name.toLowerCase().indexOf(searchVal) != -1 || item.surname.toLowerCase().indexOf(searchVal) != -1 || item.avatar.toLowerCase().indexOf(searchVal) != -1 || item.birthday.toLowerCase().indexOf(searchVal) != -1))
     let idData = filterData.map(item => item.id);
     let tableRows = document.getElementsByTagName('tr');
     let id;
+
     for (let i = 1; i < tableRows.length; i++) {
-      id = tableRows[i].childNodes[5].childNodes[0].nodeValue;
+      id = tableRows[i].childNodes[nuberIdColumns - 1].childNodes[0].nodeValue;
       if (idData.indexOf(id) == -1) {
         tableRows[i].classList.add('hidden');
       } else {
         tableRows[i].classList.remove('hidden');
       }
     }
-
+    newData = filterData;
   })
 
 
