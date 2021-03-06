@@ -232,8 +232,7 @@ async function newItem(data) {
    * @param {*} isArrow just for header - add filter arrow
    */
   function formCells(el, index, isArrow) {
-
-    for (let key in newData[index]) {
+    for (let key in newData[index]) {     
       tableRow.appendChild(addTextToCell(el, newData[index][key], isArrow, key));
     }
   }
@@ -247,6 +246,7 @@ async function newItem(data) {
    */
   function addTextToCell(element, text, isArrow, id) {
     let th = document.createElement(element);
+    th.setAttribute('aria-label', newData[0][id]);
     if (id == 'id') {
       th.className = 'hidden';
     }

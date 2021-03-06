@@ -83,6 +83,8 @@ button:hover {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
   -webkit-box-pack: justify;
       -ms-flex-pack: justify;
           justify-content: space-between;
@@ -186,5 +188,32 @@ table tbody tr:hover {
 
 .imgAvatar {
   max-width: 50px;
+}
+
+.btnAdd {
+  margin-top: 20px;
+}
+
+@media screen and (max-width: 800px) {
+  .searchPanel {
+    padding-left: 20px;
+  }
+  table thead {
+    display: none;
+  }
+  table tr {
+    display: block;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e8e9eb;
+  }
+  table td {
+    display: block;
+    text-align: right;
+  }
+  table td:before {
+    content: attr(aria-label);
+    float: left;
+    font-weight: bold;
+  }
 }
 /*# sourceMappingURL=app.css.map */

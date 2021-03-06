@@ -50,6 +50,7 @@ button
   width: 100%
   padding: 2px
   display: flex
+  flex-wrap: wrap
   justify-content: space-between
   margin-bottom: 20px
 .search
@@ -120,3 +121,26 @@ table tbody tr:hover
 
 .imgAvatar
   max-width: 50px
+
+.btnAdd
+  margin-top: 20px
+
+@media screen and (max-width: 800px)
+  .searchPanel
+    padding-left: 20px
+  table thead 
+    display: none
+  
+  table tr
+    display: block
+    margin-bottom: 1rem
+    border-bottom: 2px solid #e8e9eb
+  
+  table td
+    display: block
+    text-align: right
+  
+  table td:before
+    content: attr(aria-label)
+    float: left
+    font-weight: bold
