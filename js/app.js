@@ -1,4 +1,3 @@
-window.onload = () => {
   //Input data
   const config1 = {
     parent: '#usersTable',
@@ -423,4 +422,5 @@ window.onload = () => {
       }
     }
   })();
-}
+
+
